@@ -12,10 +12,11 @@ var endpoint = "https://api.api.ai/v1/query"
 var version = "20150910"
 
 // New returns a new client
-func New(token string) Requester {
+func New(token, lang string) Requester {
 	instance := &client{
 		token:      token,
 		httpClient: &http.Client{},
+		lang:       lang,
 	}
 	return instance
 }
@@ -28,13 +29,14 @@ type Requester interface {
 type client struct {
 	token      string
 	httpClient *http.Client
+	lang       string
 }
 
 type payloadGetter interface {
 	GetPayload() interface{}
 }
 
-func (b *client) makeAPIRequest(payload RequestPayload) ([]byte, error) {
+func (c *client) makeAPIRequest(payload RequestPayload) ([]byte, error) {
 
 	requestBody, requestBodyErr := json.Marshal(payload)
 	if requestBodyErr != nil {
@@ -50,9 +52,9 @@ func (b *client) makeAPIRequest(payload RequestPayload) ([]byte, error) {
 	q.Set("v", version)
 	req.URL.RawQuery = q.Encode()
 
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", b.token))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", c.token))
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	call, callErr := b.httpClient.Do(req)
+	call, callErr := c.httpClient.Do(req)
 	if callErr != nil {
 		return nil, callErr
 	}
@@ -61,14 +63,15 @@ func (b *client) makeAPIRequest(payload RequestPayload) ([]byte, error) {
 }
 
 // Request calls the backend using the given message and contexts
-func (b *client) Request(message, sessionID string, contexts *ContextCollection) (*Response, error) {
+func (c *client) Request(message, sessionID string, contexts *ContextCollection) (*Response, error) {
 	payload := RequestPayload{
 		Query:     message,
 		Contexts:  *contexts,
 		SessionID: sessionID,
+		Lang:      c.lang,
 	}
 
-	responseBody, responseErr := b.makeAPIRequest(payload)
+	responseBody, responseErr := c.makeAPIRequest(payload)
 	if responseErr != nil {
 		return nil, responseErr
 	}
