@@ -23,7 +23,7 @@ func New(token, lang string) Requester {
 
 // Requester is the interface describing a client instance
 type Requester interface {
-	Request(string, string, *ContextCollection) (*Response, error)
+	Request(message string, sessionID string, contexts *ContextCollection) (*Response, error)
 }
 
 type client struct {
