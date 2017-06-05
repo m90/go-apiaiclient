@@ -55,6 +55,7 @@ func (c *client) makeAPIRequest(payload RequestPayload) ([]byte, error) {
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", c.token))
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	call, callErr := c.httpClient.Do(req)
+	defer func() { call.Body.Close() }()
 	if callErr != nil {
 		return nil, callErr
 	}
