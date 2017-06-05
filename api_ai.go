@@ -50,17 +50,18 @@ func (c *client) makeAPIRequest(payload RequestPayload) ([]byte, error) {
 
 	q := req.URL.Query()
 	q.Set("v", version)
-	req.URL.RawQuery = q.Encode()
 
+	req.URL.RawQuery = q.Encode()
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", c.token))
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	call, callErr := c.httpClient.Do(req)
-	defer func() { call.Body.Close() }()
-	if callErr != nil {
-		return nil, callErr
+
+	res, resErr := c.httpClient.Do(req)
+	defer func() { res.Body.Close() }()
+	if resErr != nil {
+		return nil, resErr
 	}
 
-	return ioutil.ReadAll(call.Body)
+	return ioutil.ReadAll(res.Body)
 }
 
 // Request calls the backend using the given message and contexts
