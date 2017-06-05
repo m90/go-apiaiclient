@@ -15,11 +15,20 @@ $ go get github.com/m90/go-apiaiclient
 
 ## Usage
 
-Instantiate a new client using `New(token string, language string)` and call `Request(message string, sessionID string, contexts *ContextCollection)`:
+Instantiate a new client using `New(token string, language string)` and call `Request(message string, sessionID string, contexts *[]map[string]interface{})`:
 
 ```go
 client := apiaiclient.New("my_token", "en")
-response, err := client.Request("Good morning Mr. Magpie", "session_id", &apiaiclient.ContextCollection{/*...*/})
+contexts := &[]map[string]interface{}{
+	map[string]interface{}{
+		"name": "some-name",
+		"lifespan": 12,
+		"parameters": map[string]interface{}{
+			"some-parameter": true,
+		},
+	},
+}
+response, err := client.Request("Good morning Mr. Magpie", "session_id", contexts)
 ```
 
 ## Tests

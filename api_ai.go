@@ -23,7 +23,7 @@ func New(token, lang string) Requester {
 
 // Requester is the interface describing a client instance
 type Requester interface {
-	Request(message string, sessionID string, contexts *ContextCollection) (*Response, error)
+	Request(message string, sessionID string, contexts *[]map[string]interface{}) (*Response, error)
 }
 
 type client struct {
@@ -65,7 +65,8 @@ func (c *client) makeAPIRequest(payload RequestPayload) ([]byte, error) {
 }
 
 // Request calls the backend using the given message and contexts
-func (c *client) Request(message, sessionID string, contexts *ContextCollection) (*Response, error) {
+func (c *client) Request(message, sessionID string, contextData *[]map[string]interface{}) (*Response, error) {
+	contexts := newContextCollection(contextData)
 	payload := RequestPayload{
 		Query:     message,
 		Contexts:  *contexts,

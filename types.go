@@ -47,14 +47,29 @@ func (l *MessageCollection) SelectPlatformMesssages(platform string) {
 
 // Context describes a an api-ai conversation context
 type Context struct {
-	Name       string                  `json:"name" bson:"name"`
-	Lifespan   int                     `json:"lifespan" bson:"lifespan"`
-	Parameters *map[string]interface{} `json:"parameters,omitempty" bson:"parameters,omitempty"`
+	Name       string                  `json:"name"`
+	Lifespan   int                     `json:"lifespan"`
+	Parameters *map[string]interface{} `json:"parameters,omitempty"`
 }
 
 // ContextCollection proxes []Context and adds helper methods on top
 type ContextCollection []Context
 
+func newContextCollection(data *[]map[string]interface{}) *ContextCollection {
+	out := make(ContextCollection, len(*data))
+	for idx, item := range *data {
+		params := item["parameters"].(map[string]interface{})
+		ctx := Context{
+			Name:       item["name"].(string),
+			Lifespan:   item["lifespan"].(int),
+			Parameters: &params,
+		}
+		out[idx] = ctx
+	}
+	return &out
+}
+
+// GetUpdate returns the ContextCollection as an []interface{}
 func (l ContextCollection) GetUpdate() []interface{} {
 	cast := make([]interface{}, len(l))
 	for i, item := range l {

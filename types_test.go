@@ -1,6 +1,7 @@
 package apiaiclient
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -182,6 +183,40 @@ func TestGetUpdate(t *testing.T) {
 		update := test.collection.GetUpdate()
 		if len(update) != len(test.collection) {
 			t.Error("Expected update to be of same length as collection")
+		}
+	}
+}
+
+func TestNewContextCollection(t *testing.T) {
+	tests := []struct {
+		input    []map[string]interface{}
+		expected *ContextCollection
+	}{
+		{
+			[]map[string]interface{}{
+				map[string]interface{}{
+					"name":     "foobar",
+					"lifespan": 12,
+					"parameters": map[string]interface{}{
+						"foo_id": "yes",
+					},
+				},
+			},
+			&ContextCollection{
+				Context{
+					Name:     "foobar",
+					Lifespan: 12,
+					Parameters: &map[string]interface{}{
+						"foo_id": "yes",
+					},
+				},
+			},
+		},
+	}
+	for _, test := range tests {
+		result := newContextCollection(&test.input)
+		if !reflect.DeepEqual(result, test.expected) {
+			t.Errorf("Expected result of %+v, got %+v", test.expected, result)
 		}
 	}
 }

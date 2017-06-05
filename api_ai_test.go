@@ -11,13 +11,13 @@ func TestRequest(t *testing.T) {
 	tests := []struct {
 		message       string
 		sessionID     string
-		contexts      ContextCollection
+		contexts      []map[string]interface{}
 		expectedError bool
 		token         string
 		lang          string
 	}{
-		{"Hello Gophers", "foo-bar", ContextCollection{}, false, "secret", "en"},
-		{"Hello Gophers", "foo-bar", ContextCollection{}, true, "secret", "de"},
+		{"Hello Gophers", "foo-bar", []map[string]interface{}{}, false, "secret", "en"},
+		{"Hello Gophers", "foo-bar", []map[string]interface{}{}, true, "secret", "de"},
 	}
 	for _, test := range tests {
 		previousEndpoint := endpoint
