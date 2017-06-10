@@ -3,7 +3,7 @@ package apiaiclient
 // Response describes the wrapper around an API.AI response
 type Response struct {
 	Result struct {
-		Contexts    ContextCollection
+		Contexts    ContextCollection `json:"contexts"`
 		Fulfillment struct {
 			Speech   string            `json:"speech"`
 			Messages MessageCollection `json:"messages"`
