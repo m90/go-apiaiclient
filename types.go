@@ -2,13 +2,19 @@ package apiaiclient
 
 // Response describes the wrapper around an API.AI response
 type Response struct {
-	Result struct {
-		Contexts    ContextCollection `json:"contexts"`
-		Fulfillment struct {
-			Speech   string            `json:"speech"`
-			Messages MessageCollection `json:"messages"`
-		} `json:"fulfillment"`
-	} `json:"result"`
+	Result Result `json:"result"`
+}
+
+// Result describes the result contained in a response
+type Result struct {
+	Contexts    ContextCollection `json:"contexts"`
+	Fulfillment Fulfillment       `json:"fulfillment"`
+}
+
+// Fulfillment describes the fulfillment data contained in a response
+type Fulfillment struct {
+	Speech   string            `json:"speech"`
+	Messages MessageCollection `json:"messages"`
 }
 
 // Message describes a message contained in a server payload
@@ -55,6 +61,7 @@ type Context struct {
 // ContextCollection proxes []Context and adds helper methods on top
 type ContextCollection []Context
 
+// GetUpdate transforms the collection into a []interface{}
 func (l ContextCollection) GetUpdate() []interface{} {
 	cast := make([]interface{}, len(l))
 	for i, item := range l {
