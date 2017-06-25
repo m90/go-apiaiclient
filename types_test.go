@@ -6,9 +6,10 @@ import (
 
 func TestFilterContextsByName(t *testing.T) {
 	tests := []struct {
-		collection  ContextCollection
-		name        string
-		expectedLen int
+		collection     ContextCollection
+		name           string
+		expectedLen    int
+		expectedResult bool
 	}{
 		{
 			ContextCollection{
@@ -18,6 +19,7 @@ func TestFilterContextsByName(t *testing.T) {
 			},
 			"foo",
 			2,
+			true,
 		},
 		{
 			ContextCollection{
@@ -27,26 +29,32 @@ func TestFilterContextsByName(t *testing.T) {
 			},
 			"zalgo",
 			3,
+			false,
 		},
 		{
 			ContextCollection{},
 			"zalgo",
 			0,
+			false,
 		},
 	}
 	for _, test := range tests {
-		test.collection.FilterByContextNames(test.name)
+		removed := test.collection.FilterByContextNames(test.name)
 		if len(test.collection) != test.expectedLen {
 			t.Errorf("Expected length of %v, got %v", test.expectedLen, len(test.collection))
+		}
+		if removed != test.expectedResult {
+			t.Errorf("Expected return value of %v, got %v", test.expectedResult, removed)
 		}
 	}
 }
 
 func TestFilterByGenericNames(t *testing.T) {
 	tests := []struct {
-		collection  ContextCollection
-		genericName string
-		expectedLen int
+		collection     ContextCollection
+		genericName    string
+		expectedLen    int
+		expectedResult bool
 	}{
 		{
 			ContextCollection{
@@ -74,6 +82,7 @@ func TestFilterByGenericNames(t *testing.T) {
 			},
 			"filterme",
 			2,
+			true,
 		},
 		{
 			ContextCollection{
@@ -101,17 +110,22 @@ func TestFilterByGenericNames(t *testing.T) {
 			},
 			"baz",
 			3,
+			false,
 		},
 		{
 			ContextCollection{},
 			"filter",
 			0,
+			false,
 		},
 	}
 	for _, test := range tests {
-		test.collection.FilterByGenericNames(test.genericName)
+		removed := test.collection.FilterByGenericNames(test.genericName)
 		if len(test.collection) != test.expectedLen {
 			t.Errorf("Expected length of %v, got %v", test.expectedLen, len(test.collection))
+		}
+		if removed != test.expectedResult {
+			t.Errorf("Expected return value of %v, got %v", test.expectedResult, removed)
 		}
 	}
 }

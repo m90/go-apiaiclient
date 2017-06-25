@@ -72,12 +72,14 @@ func (l ContextCollection) GetUpdate() []interface{} {
 
 // FilterByContextNames removes any contexts from the collection
 // that are of the give name
-func (l *ContextCollection) FilterByContextNames(filters ...string) {
+func (l *ContextCollection) FilterByContextNames(filters ...string) bool {
 	filtered := ContextCollection{}
+	removal := false
 	for _, ctx := range *l {
 		match := false
 		for _, name := range filters {
 			if ctx.Name == name {
+				removal = true
 				match = true
 				break
 			}
@@ -87,12 +89,14 @@ func (l *ContextCollection) FilterByContextNames(filters ...string) {
 		}
 	}
 	*l = filtered
+	return removal
 }
 
 // FilterByGenericNames removes any context from the collection that is
 // of name generic and the generic context contains any of the given keys
-func (l *ContextCollection) FilterByGenericNames(filters ...string) {
+func (l *ContextCollection) FilterByGenericNames(filters ...string) bool {
 	filtered := ContextCollection{}
+	removal := false
 	for _, ctx := range *l {
 		if ctx.Name != "generic" || ctx.Parameters == nil {
 			filtered = append(filtered, ctx)
@@ -101,6 +105,7 @@ func (l *ContextCollection) FilterByGenericNames(filters ...string) {
 		match := false
 		for _, key := range filters {
 			if _, ok := (*ctx.Parameters)[key]; ok {
+				removal = true
 				match = true
 				break
 			}
@@ -110,6 +115,7 @@ func (l *ContextCollection) FilterByGenericNames(filters ...string) {
 		}
 	}
 	*l = filtered
+	return removal
 }
 
 // RequestPayload describes the payload that will be sent to API.AI
