@@ -56,10 +56,10 @@ func (c *client) makeAPIRequest(payload RequestPayload) ([]byte, error) {
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 
 	res, resErr := c.httpClient.Do(req)
-	defer func() { res.Body.Close() }()
 	if resErr != nil {
 		return nil, resErr
 	}
+	defer res.Body.Close()
 
 	return ioutil.ReadAll(res.Body)
 }

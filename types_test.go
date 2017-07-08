@@ -6,12 +6,14 @@ import (
 
 func TestFilterContextsByName(t *testing.T) {
 	tests := []struct {
-		collection     ContextCollection
 		name           string
+		collection     ContextCollection
+		contextName    string
 		expectedLen    int
 		expectedResult bool
 	}{
 		{
+			"default",
 			ContextCollection{
 				Context{Name: "foo"},
 				Context{Name: "bar"},
@@ -22,6 +24,7 @@ func TestFilterContextsByName(t *testing.T) {
 			true,
 		},
 		{
+			"no match",
 			ContextCollection{
 				Context{Name: "foo"},
 				Context{Name: "bar"},
@@ -32,6 +35,7 @@ func TestFilterContextsByName(t *testing.T) {
 			false,
 		},
 		{
+			"empty collection",
 			ContextCollection{},
 			"zalgo",
 			0,
@@ -39,24 +43,28 @@ func TestFilterContextsByName(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		removed := test.collection.FilterByContextNames(test.name)
-		if len(test.collection) != test.expectedLen {
-			t.Errorf("Expected length of %v, got %v", test.expectedLen, len(test.collection))
-		}
-		if removed != test.expectedResult {
-			t.Errorf("Expected return value of %v, got %v", test.expectedResult, removed)
-		}
+		t.Run(test.name, func(t *testing.T) {
+			removed := test.collection.FilterByContextNames(test.contextName)
+			if len(test.collection) != test.expectedLen {
+				t.Errorf("Expected length of %v, got %v", test.expectedLen, len(test.collection))
+			}
+			if removed != test.expectedResult {
+				t.Errorf("Expected return value of %v, got %v", test.expectedResult, removed)
+			}
+		})
 	}
 }
 
 func TestFilterByGenericNames(t *testing.T) {
 	tests := []struct {
+		name           string
 		collection     ContextCollection
 		genericName    string
 		expectedLen    int
 		expectedResult bool
 	}{
 		{
+			"default",
 			ContextCollection{
 				Context{
 					Name:     "generic",
@@ -85,6 +93,7 @@ func TestFilterByGenericNames(t *testing.T) {
 			true,
 		},
 		{
+			"no match",
 			ContextCollection{
 				Context{
 					Name:     "generic",
@@ -113,6 +122,7 @@ func TestFilterByGenericNames(t *testing.T) {
 			false,
 		},
 		{
+			"empty collection",
 			ContextCollection{},
 			"filter",
 			0,
@@ -120,23 +130,27 @@ func TestFilterByGenericNames(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		removed := test.collection.FilterByGenericNames(test.genericName)
-		if len(test.collection) != test.expectedLen {
-			t.Errorf("Expected length of %v, got %v", test.expectedLen, len(test.collection))
-		}
-		if removed != test.expectedResult {
-			t.Errorf("Expected return value of %v, got %v", test.expectedResult, removed)
-		}
+		t.Run(test.name, func(t *testing.T) {
+			removed := test.collection.FilterByGenericNames(test.genericName)
+			if len(test.collection) != test.expectedLen {
+				t.Errorf("Expected length of %v, got %v", test.expectedLen, len(test.collection))
+			}
+			if removed != test.expectedResult {
+				t.Errorf("Expected return value of %v, got %v", test.expectedResult, removed)
+			}
+		})
 	}
 }
 
 func TestSelectPlatformMessages(t *testing.T) {
 	tests := []struct {
+		name        string
 		collection  MessageCollection
 		platform    string
 		expectedLen int
 	}{
 		{
+			"mixed",
 			MessageCollection{
 				Message{Platform: "foo"},
 				Message{Platform: "bar"},
@@ -146,6 +160,7 @@ func TestSelectPlatformMessages(t *testing.T) {
 			2,
 		},
 		{
+			"no platform match",
 			MessageCollection{
 				Message{},
 				Message{},
@@ -155,6 +170,7 @@ func TestSelectPlatformMessages(t *testing.T) {
 			3,
 		},
 		{
+			"all match",
 			MessageCollection{
 				Message{Platform: "foo"},
 				Message{Platform: "foo"},
@@ -164,24 +180,29 @@ func TestSelectPlatformMessages(t *testing.T) {
 			3,
 		},
 		{
+			"empty collection",
 			MessageCollection{},
 			"foo",
 			0,
 		},
 	}
 	for _, test := range tests {
-		test.collection.SelectPlatformMesssages(test.platform)
-		if len(test.collection) != test.expectedLen {
-			t.Errorf("Expected %v messages, got %v", test.expectedLen, len(test.collection))
-		}
+		t.Run(test.name, func(t *testing.T) {
+			test.collection.SelectPlatformMesssages(test.platform)
+			if len(test.collection) != test.expectedLen {
+				t.Errorf("Expected %v messages, got %v", test.expectedLen, len(test.collection))
+			}
+		})
 	}
 }
 
 func TestGetUpdate(t *testing.T) {
 	tests := []struct {
+		name       string
 		collection ContextCollection
 	}{
 		{
+			"default",
 			ContextCollection{
 				Context{Name: "foo"},
 				Context{Name: "bar"},
@@ -189,13 +210,16 @@ func TestGetUpdate(t *testing.T) {
 			},
 		},
 		{
+			"empty",
 			ContextCollection{},
 		},
 	}
 	for _, test := range tests {
-		update := test.collection.GetUpdate()
-		if len(update) != len(test.collection) {
-			t.Error("Expected update to be of same length as collection")
-		}
+		t.Run(test.name, func(t *testing.T) {
+			update := test.collection.GetUpdate()
+			if len(update) != len(test.collection) {
+				t.Error("Expected update to be of same length as collection")
+			}
+		})
 	}
 }
