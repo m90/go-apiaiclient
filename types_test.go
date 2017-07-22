@@ -142,6 +142,66 @@ func TestFilterByGenericNames(t *testing.T) {
 	}
 }
 
+func TestContainsContextName(t *testing.T) {
+	tests := []struct {
+		name       string
+		collection ContextCollection
+		filters    []string
+		expected   bool
+	}{
+		{
+			"default",
+			ContextCollection{
+				Context{Name: "foo"},
+				Context{Name: "bar"},
+			},
+			[]string{"bar"},
+			true,
+		},
+		{
+			"miss",
+			ContextCollection{
+				Context{Name: "foo"},
+				Context{Name: "bar"},
+			},
+			[]string{"baz"},
+			false,
+		},
+		{
+			"empty",
+			ContextCollection{},
+			[]string{"baz"},
+			false,
+		},
+		{
+			"multi arg",
+			ContextCollection{
+				Context{Name: "foo"},
+			},
+			[]string{"baz", "foo"},
+			true,
+		},
+		{
+			"nested",
+			ContextCollection{
+				Context{
+					Name:       "bar",
+					Parameters: &map[string]interface{}{"foo": 99},
+				},
+			},
+			[]string{"foo"},
+			false,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if result := test.collection.ContainsContextName(test.filters...); result != test.expected {
+				t.Errorf("Expected %v, got %v", test.expected, result)
+			}
+		})
+	}
+}
+
 func TestSelectPlatformMessages(t *testing.T) {
 	tests := []struct {
 		name        string

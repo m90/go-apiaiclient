@@ -92,6 +92,19 @@ func (l *ContextCollection) FilterByContextNames(filters ...string) bool {
 	return removal
 }
 
+// ContainsContextName checks if the collection contains a context of one
+// of the given names without mutating the collection
+func (l *ContextCollection) ContainsContextName(filters ...string) bool {
+	for _, ctx := range *l {
+		for _, name := range filters {
+			if ctx.Name == name {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // FilterByGenericNames removes any context from the collection that is
 // of name generic and the generic context contains any of the given keys
 func (l *ContextCollection) FilterByGenericNames(filters ...string) bool {
