@@ -1,6 +1,7 @@
 package apiaiclient
 
 import (
+	"reflect"
 	"testing"
 )
 
@@ -279,6 +280,116 @@ func TestGetUpdate(t *testing.T) {
 			update := test.collection.GetUpdate()
 			if len(update) != len(test.collection) {
 				t.Error("Expected update to be of same length as collection")
+			}
+		})
+	}
+}
+
+func TestFilterParametersByKey(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    ContextCollection
+		tokens   []string
+		expected ContextCollection
+	}{
+		{
+			"default",
+			ContextCollection{
+				Context{
+					Name: "test",
+					Parameters: &map[string]interface{}{
+						"foo.bar": true,
+						"baz":     false,
+					},
+				},
+			},
+			[]string{"."},
+			ContextCollection{
+				Context{
+					Name: "test",
+					Parameters: &map[string]interface{}{
+						"baz": false,
+					},
+				},
+			},
+		},
+		{
+			"all match",
+			ContextCollection{
+				Context{
+					Name: "test",
+					Parameters: &map[string]interface{}{
+						"foo.bar": true,
+						"baz.qux": false,
+					},
+				},
+			},
+			[]string{"."},
+			ContextCollection{
+				Context{
+					Name:       "test",
+					Parameters: &map[string]interface{}{},
+				},
+			},
+		},
+		{
+			"mutiple tokens",
+			ContextCollection{
+				Context{
+					Name: "test",
+					Parameters: &map[string]interface{}{
+						"foo.bar":  true,
+						"baz-zong": false,
+						"baz":      false,
+					},
+				},
+			},
+			[]string{".", "-"},
+			ContextCollection{
+				Context{
+					Name: "test",
+					Parameters: &map[string]interface{}{
+						"baz": false,
+					},
+				},
+			},
+		},
+		{
+			"no match",
+			ContextCollection{
+				Context{
+					Name: "test",
+					Parameters: &map[string]interface{}{
+						"foo.bar":  true,
+						"baz-zong": false,
+						"baz":      false,
+					},
+				},
+				Context{
+					Name: "lonely",
+				},
+			},
+			[]string{"ß"},
+			ContextCollection{
+				Context{
+					Name: "test",
+					Parameters: &map[string]interface{}{
+						"foo.bar":  true,
+						"baz-zong": false,
+						"baz":      false,
+					},
+				},
+				Context{
+					Name: "lonely",
+				},
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			test.input.FilterParametersByKey(test.tokens...)
+			if !reflect.DeepEqual(test.input, test.expected) {
+				t.Errorf("Expected %#v, got %#v", test.expected, test.input)
 			}
 		})
 	}

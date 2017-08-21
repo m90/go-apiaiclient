@@ -79,6 +79,5 @@ func (c *client) Request(message, sessionID string, contexts *ContextCollection)
 	}
 	response := &Response{}
 	unmarshalErr := json.Unmarshal(responseBody, response)
-
 	return response, unmarshalErr
 }

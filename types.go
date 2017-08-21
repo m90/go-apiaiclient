@@ -1,5 +1,9 @@
 package apiaiclient
 
+import (
+	"strings"
+)
+
 // Response describes the wrapper around an API.AI response
 type Response struct {
 	Result Result `json:"result"`
@@ -89,6 +93,30 @@ func (l *ContextCollection) FilterByContextNames(filters ...string) bool {
 		}
 	}
 	*l = filtered
+	return removal
+}
+
+// FilterParametersByKey removes all parameter values whose key contains
+// one of the given tokens
+func (l *ContextCollection) FilterParametersByKey(tokens ...string) bool {
+	removal := false
+	for _, ctx := range *l {
+		if ctx.Parameters == nil {
+			continue
+		}
+		params := map[string]interface{}{}
+	param:
+		for key, value := range *ctx.Parameters {
+			for _, token := range tokens {
+				if strings.Contains(key, token) {
+					removal = true
+					continue param
+				}
+			}
+			params[key] = value
+		}
+		*ctx.Parameters = params
+	}
 	return removal
 }
 
