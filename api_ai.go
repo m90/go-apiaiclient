@@ -59,8 +59,15 @@ func (c *client) makeAPIRequest(payload RequestPayload) ([]byte, error) {
 	if resErr != nil {
 		return nil, resErr
 	}
-	defer res.Body.Close()
+	if res.StatusCode >= http.StatusBadRequest {
+		return nil, fmt.Errorf(
+			"api.ai returned %v %v",
+			res.StatusCode,
+			http.StatusText(res.StatusCode),
+		)
+	}
 
+	defer res.Body.Close()
 	return ioutil.ReadAll(res.Body)
 }
 
