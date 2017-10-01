@@ -21,6 +21,15 @@ type Fulfillment struct {
 	Messages MessageCollection `json:"messages"`
 }
 
+// constants that will populate a message's `type` field
+const (
+	MessageTypeText          = 0
+	MessageTypeCardMessage   = 1
+	MessageTypeQuickReplies  = 2
+	MessageTypeImage         = 3
+	MessageTypeCustomPayload = 4
+)
+
 // Message describes a message contained in a server payload
 type Message struct {
 	Type     int                               `json:"type"`
