@@ -15,7 +15,7 @@ $ go get github.com/m90/go-apiaiclient
 
 ## Usage
 
-Instantiate a new client using `New(token string, language string)` and call `Request(message string, sessionID string, contexts *ContextCollection)`:
+Instantiate a new client using `New(token string, language string)` and call `Request(message string, sessionID string, contexts json.Marshaler)`:
 
 ```go
 client := apiaiclient.New("my_token", "en")
