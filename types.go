@@ -1,6 +1,7 @@
 package apiaiclient
 
 import (
+	"encoding/json"
 	"strings"
 )
 
@@ -64,31 +65,22 @@ func (l *MessageCollection) SelectPlatformMesssages(platform string) {
 	*l = *platformMessages
 }
 
-// Context describes a an api-ai conversation context
+// Context describes a an api.ai conversation context
 type Context struct {
-	Name       string                  `json:"name" bson:"name"`
-	Lifespan   int                     `json:"lifespan" bson:"lifespan"`
-	Parameters *map[string]interface{} `json:"parameters,omitempty" bson:"parameters,omitempty"`
+	Name       string                  `json:"name"`
+	Lifespan   int                     `json:"lifespan"`
+	Parameters *map[string]interface{} `json:"parameters,omitempty"`
 }
 
-// ContextCollection proxes []Context and adds helper methods on top
+// ContextCollection adds helper methods to []Context
 type ContextCollection []Context
 
-// GetUpdate transforms the collection into a []interface{}
-func (l ContextCollection) GetUpdate() []interface{} {
-	cast := make([]interface{}, len(l))
-	for i, item := range l {
-		cast[i] = item
-	}
-	return cast
-}
-
 // FilterByContextNames removes any contexts from the collection
-// that are of the give name
-func (l *ContextCollection) FilterByContextNames(filters ...string) bool {
+// that are of the given name
+func (c *ContextCollection) FilterByContextNames(filters ...string) bool {
 	filtered := ContextCollection{}
 	removal := false
-	for _, ctx := range *l {
+	for _, ctx := range *c {
 		match := false
 		for _, name := range filters {
 			if ctx.Name == name {
@@ -101,15 +93,15 @@ func (l *ContextCollection) FilterByContextNames(filters ...string) bool {
 			filtered = append(filtered, ctx)
 		}
 	}
-	*l = filtered
+	*c = filtered
 	return removal
 }
 
 // FilterParametersByKey removes all parameter values whose key contains
 // one of the given tokens
-func (l *ContextCollection) FilterParametersByKey(tokens ...string) bool {
+func (c *ContextCollection) FilterParametersByKey(tokens ...string) bool {
 	removal := false
-	for _, ctx := range *l {
+	for _, ctx := range *c {
 		if ctx.Parameters == nil {
 			continue
 		}
@@ -131,8 +123,8 @@ func (l *ContextCollection) FilterParametersByKey(tokens ...string) bool {
 
 // ContainsContextName checks if the collection contains a context of one
 // of the given names without mutating the collection
-func (l *ContextCollection) ContainsContextName(filters ...string) bool {
-	for _, ctx := range *l {
+func (c *ContextCollection) ContainsContextName(filters ...string) bool {
+	for _, ctx := range *c {
 		for _, name := range filters {
 			if ctx.Name == name {
 				return true
@@ -144,10 +136,10 @@ func (l *ContextCollection) ContainsContextName(filters ...string) bool {
 
 // FilterByGenericNames removes any context from the collection that is
 // of name generic and the generic context contains any of the given keys
-func (l *ContextCollection) FilterByGenericNames(filters ...string) bool {
+func (c *ContextCollection) FilterByGenericNames(filters ...string) bool {
 	filtered := ContextCollection{}
 	removal := false
-	for _, ctx := range *l {
+	for _, ctx := range *c {
 		if ctx.Name != "generic" || ctx.Parameters == nil {
 			filtered = append(filtered, ctx)
 			continue
@@ -164,14 +156,23 @@ func (l *ContextCollection) FilterByGenericNames(filters ...string) bool {
 			filtered = append(filtered, ctx)
 		}
 	}
-	*l = filtered
+	*c = filtered
 	return removal
 }
 
-// RequestPayload describes the payload that will be sent to API.AI
+// MarshalJSON returns the JSON representation of the collection
+func (c *ContextCollection) MarshalJSON() ([]byte, error) {
+	out := []Context{}
+	for _, item := range *c {
+		out = append(out, item)
+	}
+	return json.Marshal(out)
+}
+
+// RequestPayload describes the payload that will be sent to api.ai
 type RequestPayload struct {
-	Query     string            `json:"query"`
-	Contexts  ContextCollection `json:"contexts"`
-	SessionID string            `json:"sessionId"`
-	Lang      string            `json:"lang"`
+	Query     string         `json:"query"`
+	Contexts  json.Marshaler `json:"contexts"`
+	SessionID string         `json:"sessionId"`
+	Lang      string         `json:"lang"`
 }

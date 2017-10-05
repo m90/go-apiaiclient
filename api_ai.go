@@ -4,49 +4,44 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 )
 
-var endpoint = "https://api.api.ai/v1/query"
-var version = "20150910"
+var (
+	endpoint = "https://api.api.ai/v1/query"
+	version  = "20150910"
+)
 
 // New returns a new client
 func New(token, lang string) Requester {
-	instance := &client{
-		token:      token,
-		httpClient: &http.Client{},
-		lang:       lang,
-	}
-	return instance
+	return &client{token, lang}
 }
 
 // Requester is the interface describing a client instance
 type Requester interface {
-	Request(message string, sessionID string, contexts *ContextCollection) (*Response, error)
+	Request(message, sessionID string, contexts json.Marshaler) (*Response, error)
 }
 
 type client struct {
-	token      string
-	httpClient *http.Client
-	lang       string
+	token string
+	lang  string
 }
 
-type payloadGetter interface {
-	GetPayload() interface{}
-}
-
-func (c *client) makeAPIRequest(payload RequestPayload) ([]byte, error) {
-
+func (c *client) makeAPIRequest(payload RequestPayload) (io.ReadCloser, error) {
 	requestBody, requestBodyErr := json.Marshal(payload)
 	if requestBodyErr != nil {
 		return nil, requestBodyErr
 	}
 
-	req, _ := http.NewRequest(
+	req, reqErr := http.NewRequest(
 		http.MethodPost,
 		endpoint,
-		bytes.NewBuffer(requestBody))
+		bytes.NewBuffer(requestBody),
+	)
+	if reqErr != nil {
+		return nil, reqErr
+	}
 
 	q := req.URL.Query()
 	q.Set("v", version)
@@ -55,9 +50,9 @@ func (c *client) makeAPIRequest(payload RequestPayload) ([]byte, error) {
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %v", c.token))
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 
-	res, resErr := c.httpClient.Do(req)
-	if resErr != nil {
-		return nil, resErr
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
 	}
 	if res.StatusCode >= http.StatusBadRequest {
 		return nil, fmt.Errorf(
@@ -67,24 +62,22 @@ func (c *client) makeAPIRequest(payload RequestPayload) ([]byte, error) {
 		)
 	}
 
-	defer res.Body.Close()
-	return ioutil.ReadAll(res.Body)
+	return res.Body, nil
 }
 
-// Request calls the backend using the given message and contexts
-func (c *client) Request(message, sessionID string, contexts *ContextCollection) (*Response, error) {
-	payload := RequestPayload{
+// Request calls api.ai using the given message and contexts
+func (c *client) Request(message, sessionID string, contexts json.Marshaler) (*Response, error) {
+	reader, err := c.makeAPIRequest(RequestPayload{
 		Query:     message,
-		Contexts:  *contexts,
+		Contexts:  contexts,
 		SessionID: sessionID,
 		Lang:      c.lang,
+	})
+	if err != nil {
+		return nil, err
 	}
-
-	responseBody, responseErr := c.makeAPIRequest(payload)
-	if responseErr != nil {
-		return nil, responseErr
-	}
+	defer reader.Close()
 	response := &Response{}
-	unmarshalErr := json.Unmarshal(responseBody, response)
-	return response, unmarshalErr
+	decodeErr := json.NewDecoder(reader).Decode(&response)
+	return response, decodeErr
 }

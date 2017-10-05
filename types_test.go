@@ -257,34 +257,6 @@ func TestSelectPlatformMessages(t *testing.T) {
 	}
 }
 
-func TestGetUpdate(t *testing.T) {
-	tests := []struct {
-		name       string
-		collection ContextCollection
-	}{
-		{
-			"default",
-			ContextCollection{
-				Context{Name: "foo"},
-				Context{Name: "bar"},
-				Context{Name: "baz"},
-			},
-		},
-		{
-			"empty",
-			ContextCollection{},
-		},
-	}
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			update := test.collection.GetUpdate()
-			if len(update) != len(test.collection) {
-				t.Error("Expected update to be of same length as collection")
-			}
-		})
-	}
-}
-
 func TestFilterParametersByKey(t *testing.T) {
 	tests := []struct {
 		name     string
