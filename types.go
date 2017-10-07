@@ -67,9 +67,9 @@ func (l *MessageCollection) SelectPlatformMesssages(platform string) {
 
 // Context describes a an api.ai conversation context
 type Context struct {
-	Name       string                  `json:"name"`
-	Lifespan   int                     `json:"lifespan"`
-	Parameters *map[string]interface{} `json:"parameters,omitempty"`
+	Name       string                  `json:"name" bson:"name"`
+	Lifespan   int                     `json:"lifespan" bson:"lifespan"`
+	Parameters *map[string]interface{} `json:"parameters,omitempty" bson:"parameters,omitempty"`
 }
 
 // ContextCollection adds helper methods to []Context
