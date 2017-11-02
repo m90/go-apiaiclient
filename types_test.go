@@ -3,6 +3,7 @@ package apiaiclient
 import (
 	"reflect"
 	"testing"
+	"time"
 )
 
 func TestFilterContextsByName(t *testing.T) {
@@ -362,6 +363,34 @@ func TestFilterParametersByKey(t *testing.T) {
 			test.input.FilterParametersByKey(test.tokens...)
 			if !reflect.DeepEqual(test.input, test.expected) {
 				t.Errorf("Expected %#v, got %#v", test.expected, test.input)
+			}
+		})
+	}
+}
+
+func TestMetaData(t *testing.T) {
+	tests := []struct {
+		name     string
+		value    int64
+		expected time.Duration
+	}{
+		{
+			"default",
+			1000,
+			time.Second,
+		},
+		{
+			"zero",
+			0,
+			0,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			m := Metadata{WebhookResponseTime: test.value}
+			result := m.ResponseTime()
+			if test.expected != result {
+				t.Errorf("Expected %v, got %v", test.expected, result)
 			}
 		})
 	}

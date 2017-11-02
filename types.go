@@ -2,7 +2,9 @@ package apiaiclient
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
+	"time"
 )
 
 // Response describes the wrapper around an API.AI response
@@ -14,12 +16,30 @@ type Response struct {
 type Result struct {
 	Contexts    ContextCollection `json:"contexts"`
 	Fulfillment Fulfillment       `json:"fulfillment"`
+	Metadata    Metadata          `json:"metadata"`
 }
 
 // Fulfillment describes the fulfillment data contained in a response
 type Fulfillment struct {
 	Speech   string            `json:"speech"`
 	Messages MessageCollection `json:"messages"`
+}
+
+// Metadata contains metadata about a result
+type Metadata struct {
+	IntentID                  string `json:"intentId"`
+	IntentName                string `json:"intentName"`
+	WebhookForSlotFillingUsed string `json:"webhookForSlotFillingUsed"`
+	WebhookUsed               string `json:"webhookUsed"`
+	WebhookResponseTime       int64  `json:"webhookResponseTime"`
+}
+
+// ResponseTime returns the structs `WebhookResponseTime` as a time.Duration
+func (m *Metadata) ResponseTime() time.Duration {
+	if value, err := time.ParseDuration(fmt.Sprintf("%dms", m.WebhookResponseTime)); err == nil {
+		return value
+	}
+	return 0
 }
 
 // constants that will populate a message's `type` field
