@@ -5,6 +5,10 @@
 
 > request messages from api.ai like what
 
+## DEPRECATION NOTICE
+
+This library is built against the v1 API of api.ai / Dialogflow, which is in the process of being deprecated. When building something new, use the [offical Go package for the V2 API](https://godoc.org/cloud.google.com/go/dialogflow/apiv2) instead. **This package will not be maintained in any way anymore.**
+
 ## Installation
 
 Use `go get`:
